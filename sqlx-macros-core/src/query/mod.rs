@@ -83,7 +83,7 @@ impl Metadata {
             use serde::Deserialize;
             use std::process::Command;
 
-            let cargo = env("CARGO").expect("`CARGO` must be set");
+            let cargo = env("CARGO").expect("`CARGO` must be set.");
 
             let output = Command::new(&cargo)
                 .args(&["metadata", "--format-version=1", "--no-deps"])
@@ -166,13 +166,13 @@ pub fn expand_input<'a>(
 
             // Check SQLX_OFFLINE_DIR, then local .sqlx, then workspace .sqlx.
             let dirs = [
-                env("SQLX_OFFLINE_DIR").ok().map(PathBuf::from),
-                Some(METADATA.manifest_dir.join(".sqlx")),
-                Some(METADATA.workspace_root().join(".sqlx")),
+                || env("SQLX_OFFLINE_DIR").ok().map(PathBuf::from),
+                || Some(METADATA.manifest_dir.join(".sqlx")),
+                || Some(METADATA.workspace_root().join(".sqlx")),
             ];
             let Some(data_file_path) = dirs
                 .iter()
-                .filter_map(|path| path.as_ref())
+                .filter_map(|path| path())
                 .map(|path| path.join(&filename))
                 .find(|path| path.exists())
             else {
